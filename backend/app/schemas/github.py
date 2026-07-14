@@ -10,3 +10,6 @@ class GitHubRepoResponse(BaseModel):
     owner: str
     repository: str
     github_url: str
+    branch: str
+    last_commit: str
+    last_commit_message: str
