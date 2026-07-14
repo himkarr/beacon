@@ -1,26 +1,15 @@
-import {useEffect, useState} from "react";
-import {api} from "./services/api";
+import RepoInput from "./components/RepoInput";
 
 function App() {
-  const [message, setMessage] = useState("");
-
-  useEffect(() => {
-    api.get("/health").then((res) => {
-      setMessage(res.data.service);
-    });
-  }, []);
-
   return (
     <div
       style={{
-        height: "100vh",
         display: "grid",
         placeItems: "center",
-        fontSize: "2rem",
-        fontFamily: "sans-serif",
+        height: "100vh",
       }}
     >
-      {message}
+      <RepoInput />
     </div>
   );
 }
