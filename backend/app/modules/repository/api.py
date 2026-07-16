@@ -4,11 +4,11 @@ from fastapi import APIRouter, HTTPException
 from git.exc import GitCommandError
 
 # Scanner manager instance
-from app.services.scanner.manager import ScanManager
+from app.modules.scanner.manager import ScanManager
 scanner = ScanManager()
 
-from app.schemas.github import GitHubRepoRequest, GitHubRepoResponse
-from app.services.github import (
+from app.modules.repository.schemas import GitHubRepoRequest, GitHubRepoResponse
+from app.modules.repository.service import (
     parse_github_url,
     clone_repository,
     repository_info,

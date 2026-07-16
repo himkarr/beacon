@@ -1,6 +1,6 @@
-from app.services.scanner.tools.semgrep import run_semgrep
-from app.services.scanner.tools.gitleaks import run_gitleaks
-from app.services.scanner.normalizer import normalize_findings
+from app.modules.scanner.tools.semgrep import run_semgrep
+from app.modules.scanner.tools.gitleaks import run_gitleaks
+from app.modules.scanner.normalizer import normalize_findings
 
 
 class ScanManager:
