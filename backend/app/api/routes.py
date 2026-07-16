@@ -3,6 +3,10 @@ import asyncio
 from fastapi import APIRouter, HTTPException
 from git.exc import GitCommandError
 
+# Scanner manager instance
+from app.services.scanner.manager import ScanManager
+scanner = ScanManager()
+
 from app.schemas.github import GitHubRepoRequest, GitHubRepoResponse
 from app.services.github import (
     parse_github_url,
@@ -33,15 +37,17 @@ async def scan_repository(data: GitHubRepoRequest):
         )
 
         info = await asyncio.to_thread(repository_info, path)
+        results = scanner.run(path)
 
         return {
             "status": "success",
-            "owner": repo["owner"],
             "repository": repo["repository"],
-            "github_url": f"https://github.com/{repo['owner']}/{repo['repository']}",
-            "branch": info["branch"],
-            "last_commit": info["last_commit"],
-            "last_commit_message": info["last_commit_message"],
+            "owner": repo["owner"],
+            # "github_url": str(data.github_url),
+            # "branch": info["branch"],
+            # "last_commit": info["last_commit"],
+            # "last_commit_message": info["last_commit_message"],
+            "scan": results,
         }
 
     except ValueError as exc:
