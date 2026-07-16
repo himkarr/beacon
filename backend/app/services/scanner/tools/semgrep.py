@@ -1,11 +1,30 @@
-def run_semgrep(repository_path):
+import json
+import subprocess
+from pathlib import Path
 
-    return [
-        {
-            "tool": "Semgrep",
-            "severity": "HIGH",
-            "title": "Dummy SQL Injection",
-            "file": "app.py",
-            "line": 21,
-        }
+
+def run_semgrep(repository_path: Path):
+    command = [
+        "semgrep",
+        "scan",
+        "--config",
+        "auto",
+        "--json",
+        str(repository_path),
     ]
+
+    try:
+        result = subprocess.run(
+            command,
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+
+        output = json.loads(result.stdout)
+
+        return output.get("results", [])
+
+    except subprocess.CalledProcessError as e:
+        print(e.stderr)
+        return []
