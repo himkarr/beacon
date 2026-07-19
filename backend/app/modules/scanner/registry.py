@@ -1,26 +1,30 @@
 from app.modules.scanner.tools.semgrep import SemgrepScanner
 from app.modules.scanner.tools.gitleaks import GitleaksScanner
 
+ALL_SCANNERS = [
+    SemgrepScanner,
+    GitleaksScanner,
+]
 
 class ScannerRegistry:
 
     def resolve(self, profile):
 
-        scanners = [
-            GitleaksScanner(),
-            SemgrepScanner(),
-        ]
+        scanners = []
 
-        # Python specific scanners
-        if "python" in profile.languages:
-            pass
+        for scanner_cls in ALL_SCANNERS:
 
-        # Node scanners
-        if "npm" in profile.package_managers:
-            pass
+            scanner = scanner_cls()
 
-        # Docker scanners
-        if profile.containers:
-            pass
+            if not scanner.supported_languages:
+                scanners.append(scanner)
+                continue
+
+            if (
+                profile.languages
+                &
+                scanner.supported_languages
+            ):
+                scanners.append(scanner)
 
         return scanners

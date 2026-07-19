@@ -10,6 +10,10 @@ class GitleaksScanner(BaseScanner):
 
     name = "Gitleaks"
 
+    category = "Secrets"
+
+    supported_languages = set()
+
     def scan(self, repository_path: Path):
 
         command = [

@@ -10,6 +10,17 @@ class SemgrepScanner(BaseScanner):
 
     name = "Semgrep"
 
+    category = "SAST"
+
+    supported_languages = {
+        "python",
+        "javascript",
+        "typescript",
+        "java",
+        "go",
+        "rust",
+    }
+
     def scan(self, repository_path: Path):
 
         command = [
