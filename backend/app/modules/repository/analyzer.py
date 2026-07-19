@@ -1,33 +1,68 @@
 from pathlib import Path
 
+from app.shared.models.repository import RepositoryProfile
+
+
 class RepositoryAnalyzer:
 
-    def analyze(self, repository_path: Path):
+    def analyze(self, repository_path: Path) -> RepositoryProfile:
 
-        languages = set()
+        profile = RepositoryProfile()
 
         for file in repository_path.rglob("*"):
 
+            if not file.is_file():
+                continue
+
             suffix = file.suffix.lower()
+            name = file.name.lower()
 
-            if suffix == ".py":
-                languages.add("python")
+            match suffix:
+                case ".py":
+                    profile.languages.add("python")
 
-            elif suffix in [".js", ".jsx"]:
-                languages.add("javascript")
+                case ".js":
+                    profile.languages.add("javascript")
 
-            elif suffix in [".ts", ".tsx"]:
-                languages.add("typescript")
+                case ".jsx":
+                    profile.languages.add("javascript")
 
-            elif suffix == ".java":
-                languages.add("java")
+                case ".ts":
+                    profile.languages.add("typescript")
 
-            elif suffix == ".go":
-                languages.add("go")
+                case ".tsx":
+                    profile.languages.add("typescript")
 
-            elif suffix == ".rs":
-                languages.add("rust")
+                case ".java":
+                    profile.languages.add("java")
 
-        return {
-            "languages": sorted(languages)
-        }
+                case ".go":
+                    profile.languages.add("go")
+
+                case ".rs":
+                    profile.languages.add("rust")
+
+            match name:
+
+                case "package.json":
+                    profile.package_managers.add("npm")
+
+                case "requirements.txt":
+                    profile.package_managers.add("pip")
+
+                case "pyproject.toml":
+                    profile.package_managers.add("pip")
+
+                case "pom.xml":
+                    profile.package_managers.add("maven")
+
+                case "cargo.toml":
+                    profile.package_managers.add("cargo")
+
+                case "dockerfile":
+                    profile.containers = True
+
+                case "github":
+                    profile.ci = True
+
+        return profile
