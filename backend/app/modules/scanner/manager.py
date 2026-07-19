@@ -1,3 +1,5 @@
+from app.modules.repository.analyzer import RepositoryAnalyzer
+from app.modules.scanner.tools.bandit import BanditScanner
 from app.modules.scanner.tools.semgrep import SemgrepScanner
 from app.modules.scanner.tools.gitleaks import GitleaksScanner
 from app.modules.scanner.normalizer import normalize_findings
@@ -5,18 +7,22 @@ from app.modules.scanner.normalizer import normalize_findings
 
 class ScanManager:
 
-    def __init__(self):
-
-        self.scanners = [
-            SemgrepScanner(),
-            GitleaksScanner(),
-        ]
-
     def run(self, repository_path):
 
         findings = []
 
-        for scanner in self.scanners:
+        analysis = RepositoryAnalyzer().analyze(repository_path)
+        languages = analysis["languages"]
+
+        scanners = [
+            SemgrepScanner(),
+            GitleaksScanner(),
+        ]
+
+        if "python" in languages:
+            scanners.append(BanditScanner())
+
+        for scanner in scanners:
             try:
                 findings.extend(
                     scanner.scan(repository_path)
