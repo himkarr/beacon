@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.modules.repository.api import router as repository_router
+from app.repository.api import router as repository_router
 
 app = FastAPI(
     title="Beacon",

@@ -8,3 +8,6 @@ class Finding(BaseModel):
     message: str
     file: str
     line: int | None = None
+    category: str | None = None
+    recommendation: str | None = None
+    package: str | None = None
