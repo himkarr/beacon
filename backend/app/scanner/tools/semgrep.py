@@ -30,6 +30,4 @@ class SemgrepScanner:
 
         output = json.loads(result.stdout)
 
-        return normalize_semgrep(
-            output.get("results", [])
-        )
+        return output.get("results", [])

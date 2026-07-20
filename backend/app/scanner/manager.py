@@ -1,6 +1,6 @@
 from app.scanner.summary import build_summary
 
-from app.scanner.normalizer import normalize_bandit, normalize_gitleaks, normalize_trivy
+from app.scanner.normalizer import normalize_semgrep, normalize_bandit, normalize_gitleaks, normalize_trivy
 
 from app.scanner.tools.semgrep import SemgrepScanner
 from app.scanner.tools.gitleaks import GitleaksScanner
@@ -22,7 +22,7 @@ class ScanManager:
         errors = {}
 
         scanners = (
-            ("semgrep", self.semgrep.scan, None),
+            ("semgrep", self.semgrep.scan, normalize_semgrep),
             ("gitleaks", self.gitleaks.scan, normalize_gitleaks),
             ("bandit", self.bandit.scan, normalize_bandit),
             ("trivy", self.trivy.scan, normalize_trivy),

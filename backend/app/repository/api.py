@@ -6,11 +6,9 @@ from app.shared.job_store import create_job, get_job, update_job
 from app.scanner.manager import ScanManager
 scanner = ScanManager()
 
+from app.repository.clone import clone_repository
+from app.repository.parser import parse_github_url
 from app.repository.schemas import GitHubRepoRequest
-from app.repository.service import (
-    parse_github_url,
-    clone_repository,
-)
 
 router = APIRouter()
 
