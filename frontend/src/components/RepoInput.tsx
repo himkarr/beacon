@@ -1,23 +1,41 @@
 import { isAxiosError } from "axios";
 import { useState } from "react";
-import { scanGithubRepository, type ScanGithubResponse } from "../services/api";
+import {
+  getScanJob,
+  scanGithubRepository,
+  type ScanJobResponse,
+} from "../services/api";
 
 export default function RepoInput() {
   const [url, setUrl] = useState("");
-  const [result, setResult] = useState<ScanGithubResponse | null>(null);
+  const [result, setResult] = useState<ScanJobResponse | null>(null);
   const [loading, setLoading] = useState(false);
 
   const analyze = async () => {
     try {
       setLoading(true);
 
-      const res = await scanGithubRepository(url.trim());
+      const start = await scanGithubRepository(url.trim());
 
-      setResult(res.data);
+      for (let attempts = 0; attempts < 300; attempts += 1) {
+        const job = await getScanJob(start.data.job_id);
+        setResult(job.data);
+
+        if (job.data.status === "COMPLETED") return;
+        if (job.data.status === "FAILED") {
+          throw new Error(job.data.error || "Repository scan failed");
+        }
+
+        await new Promise((resolve) => window.setTimeout(resolve, 1000));
+      }
+
+      throw new Error("Repository scan timed out");
     } catch (err: unknown) {
       const detail = isAxiosError<{ detail?: string }>(err)
         ? err.response?.data?.detail
-        : undefined;
+        : err instanceof Error
+          ? err.message
+          : undefined;
       alert(detail || "Something went wrong");
     } finally {
       setLoading(false);

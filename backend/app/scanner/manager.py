@@ -1,11 +1,6 @@
 from app.scanner.summary import build_summary
 
-from app.scanner.normalizer import (
-    normalize_semgrep,
-    normalize_gitleaks,
-    normalize_bandit,
-    normalize_trivy,
-)
+from app.scanner.normalizer import normalize_bandit, normalize_gitleaks, normalize_trivy
 
 from app.scanner.tools.semgrep import SemgrepScanner
 from app.scanner.tools.gitleaks import GitleaksScanner
@@ -24,32 +19,24 @@ class ScanManager:
     def run(self, repository_path):
 
         findings = []
+        errors = {}
 
-        findings.extend(
-            normalize_semgrep(
-                self.semgrep.scan(repository_path)
-            )
+        scanners = (
+            ("semgrep", self.semgrep.scan, None),
+            ("gitleaks", self.gitleaks.scan, normalize_gitleaks),
+            ("bandit", self.bandit.scan, normalize_bandit),
+            ("trivy", self.trivy.scan, normalize_trivy),
         )
 
-        findings.extend(
-            normalize_gitleaks(
-                self.gitleaks.scan(repository_path)
-            )
-        )
-
-        findings.extend(
-            normalize_bandit(
-                self.bandit.scan(repository_path)
-            )
-        )
-
-        findings.extend(
-            normalize_trivy(
-                self.trivy.scan(repository_path)
-            )
-        )
+        for name, scan, normalize in scanners:
+            try:
+                results = scan(repository_path)
+                findings.extend(normalize(results) if normalize else results)
+            except Exception as exc:
+                errors[name] = str(exc)
 
         return {
-    "summary": build_summary(findings),
-    "findings": [f.model_dump() for f in findings],
-}
+            "summary": build_summary(findings),
+            "findings": [finding.model_dump() for finding in findings],
+            "errors": errors,
+        }
