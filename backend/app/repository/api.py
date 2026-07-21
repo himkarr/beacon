@@ -6,6 +6,10 @@ from app.shared.job_store import create_job, get_job, update_job
 from app.scanner.manager import ScanManager
 scanner = ScanManager()
 
+# AI analysis service
+from app.ai.service import analyze_findings
+
+# Repository utilities
 from app.repository.clone import clone_repository
 from app.repository.parser import parse_github_url
 from app.repository.schemas import GitHubRepoRequest
@@ -40,6 +44,10 @@ def run_scan_job(job_id: str, repo: dict[str, str]) -> None:
     try:
         path = clone_repository(repo["owner"], repo["repository"])
         results = scanner.run(path)
+
+        ai_analysis = analyze_findings(results["findings"], results["summary"])
+        results["ai_analysis"] = ai_analysis.model_dump()
+        
         update_job(job_id, status="COMPLETED", result=results)
     except GitCommandError as exc:
         update_job(
