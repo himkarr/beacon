@@ -103,4 +103,36 @@ def normalize_trivy(results):
                 )
             )
 
+        for secret in result.get("Secrets", []):
+
+            findings.append(
+                Finding(
+                    tool="Trivy",
+                    severity=severity_map.get(
+                        secret.get("Severity", "LOW"),
+                        "LOW",
+                    ),
+                    title=secret.get("RuleID", "Secret"),
+                    message=secret.get("Title", secret.get("Category", "Secret detected")),
+                    file=target,
+                    line=secret.get("StartLine"),
+                )
+            )
+
+        for misconfig in result.get("Misconfigurations", []):
+
+            findings.append(
+                Finding(
+                    tool="Trivy",
+                    severity=severity_map.get(
+                        misconfig.get("Severity", "LOW"),
+                        "LOW",
+                    ),
+                    title=misconfig.get("ID", "Misconfiguration"),
+                    message=misconfig.get("Title", misconfig.get("Message", "")),
+                    file=target,
+                    line=misconfig.get("StartLine"),
+                )
+            )
+
     return findings

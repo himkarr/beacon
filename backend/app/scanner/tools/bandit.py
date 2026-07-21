@@ -1,5 +1,6 @@
 import json
 import subprocess
+import sys
 from pathlib import Path
 
 
@@ -8,6 +9,8 @@ class BanditScanner:
     def scan(self, repository_path: Path):
 
         command = [
+            sys.executable,
+            "-m",
             "bandit",
             "-r",
             str(repository_path),

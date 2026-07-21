@@ -1,11 +1,18 @@
 import json
+import os
 import subprocess
+import tempfile
 from pathlib import Path
 
 
 class GitleaksScanner:
 
     def scan(self, repository_path: Path):
+
+        report_path = None
+
+        with tempfile.NamedTemporaryFile(suffix=".json", delete=False) as report_file:
+            report_path = report_file.name
 
         command = [
             "gitleaks",
@@ -15,20 +22,30 @@ class GitleaksScanner:
             "--report-format",
             "json",
             "--report-path",
-            "-",
+            report_path,
         ]
 
-        result = subprocess.run(
-            command,
-            capture_output=True,
-            text=True,
-        )
+        try:
+            result = subprocess.run(
+                command,
+                capture_output=True,
+                text=True,
+            )
 
-        # Gitleaks returns exit code 1 when leaks are found.
-        if result.returncode not in (0, 1):
-            raise RuntimeError(result.stderr)
+            # Gitleaks returns exit code 1 when leaks are found.
+            if result.returncode not in (0, 1):
+                raise RuntimeError(result.stderr)
 
-        if not result.stdout.strip():
-            return []
+            if not report_path or not os.path.exists(report_path):
+                return []
 
-        return json.loads(result.stdout)
+            with open(report_path, encoding="utf-8") as report:
+                content = report.read().strip()
+
+            if not content:
+                return []
+
+            return json.loads(content)
+        finally:
+            if report_path and os.path.exists(report_path):
+                os.unlink(report_path)
