@@ -7,7 +7,7 @@ from app.scanner.manager import ScanManager
 scanner = ScanManager()
 
 # AI analysis service
-from app.ai.service import analyze_findings
+from app.ai.service import analyze_findings, AIAnalysisError
 
 # Repository utilities
 from app.repository.clone import clone_repository
@@ -45,9 +45,14 @@ def run_scan_job(job_id: str, repo: dict[str, str]) -> None:
         path = clone_repository(repo["owner"], repo["repository"])
         results = scanner.run(path)
 
-        ai_analysis = analyze_findings(results["findings"], results["summary"])
-        results["ai_analysis"] = ai_analysis.model_dump()
-        
+        try:
+            ai_analysis = analyze_findings(results["findings"], results["summary"])
+            results["ai_analysis"] = ai_analysis.model_dump()
+            results["ai_error"] = None
+        except AIAnalysisError as exc:
+            results["ai_analysis"] = None
+            results["ai_error"] = str(exc)
+
         update_job(job_id, status="COMPLETED", result=results)
     except GitCommandError as exc:
         update_job(
