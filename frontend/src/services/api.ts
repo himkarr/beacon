@@ -16,6 +16,21 @@ export interface Finding {
   package: string | null;
 }
 
+export interface AIFindingExplanation {
+  finding_index: number;
+  explanation: string;
+  remediation: string;
+  priority: number;
+}
+
+export interface AIAnalysis {
+  executive_summary: string;
+  security_score: number;
+  risk_level: string;
+  top_recommendations: string[];
+  findings: AIFindingExplanation[];
+}
+
 export interface ScanResult {
   summary: {
     total: number;
@@ -24,6 +39,8 @@ export interface ScanResult {
   };
   findings: Finding[];
   errors: Record<string, string>;
+  ai_analysis: AIAnalysis | null;
+  ai_error: string | null;
 }
 
 export interface ScanJobResponse {
